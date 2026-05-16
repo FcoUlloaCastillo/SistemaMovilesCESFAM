@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar actividad{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Confirmar eliminación</h2>
+
+    <p>
+        ¿Está seguro que desea eliminar la actividad
+        <strong>{{ actividad.nombre }}</strong>?
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <button type="submit" class="btn-eliminar">Sí, eliminar</button>
+        <a href="{% url 'listar_actividades' %}" class="btn-secundario">Cancelar</a>
+    </form>
+</section>
+
+{% endblock %}

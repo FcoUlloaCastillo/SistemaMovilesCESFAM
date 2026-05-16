@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% load l10n %}
+
+{% block title %}Detalle destino{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<section class="card">
+
+    <h2>Detalle del Destino</h2>
+
+    <p><strong>Lugar:</strong> {{ destino.nombre_lugar }}</p>
+
+    <p><strong>Dirección:</strong> {{ destino.direccion }}</p>
+
+    <p><strong>Referencia:</strong> {{ destino.referencia }}</p>
+
+    <p><strong>Latitud:</strong> {{ destino.latitud }}</p>
+
+    <p><strong>Longitud:</strong> {{ destino.longitud }}</p>
+
+    <hr>
+
+    <h3>Mapa del destino</h3>
+
+    {% if destino.latitud and destino.longitud %}
+
+        <div
+            id="mapaDestino"
+            style="height: 400px; width: 100%; border-radius: 10px; border: 1px solid #ccc;">
+        </div>
+
+        <br>
+
+        <a
+            href="https://www.openstreetmap.org/?mlat={{ destino.latitud|unlocalize }}&mlon={{ destino.longitud|unlocalize }}#map=17/{{ destino.latitud|unlocalize }}/{{ destino.longitud|unlocalize }}"
+            target="_blank"
+            class="btn-secundario">
+            Abrir mapa completo
+        </a>
+
+    {% else %}
+
+        <p>No existen coordenadas registradas para este destino.</p>
+
+    {% endif %}
+
+    <br><br>
+
+    <a href="{% url 'listar_destinos' %}" class="btn-secundario">
+        Volver
+    </a>
+
+    <a href="{% url 'editar_destino' destino.id %}" class="btn-editar">
+        Editar
+    </a>
+
+</section>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+{{ destino.latitud|json_script:"lat-destino" }}
+{{ destino.longitud|json_script:"lng-destino" }}
+{{ destino.nombre_lugar|json_script:"nombre-destino" }}
+
+<script>
+    const lat = parseFloat("{{ destino.latitud|unlocalize }}");
+    const lng = parseFloat("{{ destino.longitud|unlocalize }}");
+    const nombre = JSON.parse(document.getElementById("nombre-destino").textContent);
+
+    const mapa = L.map("mapaDestino").setView([lat, lng], 17);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap"
+    }).addTo(mapa);
+
+    L.marker([lat, lng]).addTo(mapa)
+        .bindPopup(nombre)
+        .openPopup();
+
+    setTimeout(function () {
+        mapa.invalidateSize();
+    }, 300);
+</script>
+
+{% endblock %}

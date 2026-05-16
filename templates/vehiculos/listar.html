@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehículos{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Listado de Vehículos</h2>
+
+    <a href="{% url 'crear_vehiculo' %}" class="btn">Registrar vehículo</a>
+
+    <a href="{% url 'exportar_vehiculos_excel' %}" class="btn-secundario">Exportar Excel</a>
+    <a href="{% url 'exportar_vehiculos_pdf' %}" class="btn-secundario">Exportar PDF</a>
+
+    <form method="GET" class="buscador">
+
+    <input 
+        type="text" 
+        name="buscar"
+        placeholder="Buscar por patente, tipo, marca, modelo o estado"
+        value="{{ busqueda }}"
+    >
+
+    <button type="submit" class="btn">
+        Buscar
+    </button>
+
+    <a href="{% url 'listar_vehiculos' %}" class="btn-secundario">
+        Limpiar
+    </a>
+
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Patente</th>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Año</th>
+                <th>Estado</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehiculo in page_obj %}
+            <tr>
+                <td>{{ vehiculo.patente }}</td>
+                <td>{{ vehiculo.tipo }}</td>
+                <td>{{ vehiculo.marca }}</td>
+                <td>{{ vehiculo.modelo }}</td>
+                <td>{{ vehiculo.anio }}</td>
+                <td>{{ vehiculo.estado }}</td>
+                <td>
+                    {% if vehiculo.imagen %}
+                        <img src="{{ vehiculo.imagen.url }}" width="80">
+                    {% else %}
+                        Sin imagen
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'detalle_vehiculo' vehiculo.id %}" class="btn-secundario">Detalle</a>
+                    <a href="{% url 'editar_vehiculo' vehiculo.id %}" class="btn-editar">Editar</a>
+                    <a href="{% url 'eliminar_vehiculo' vehiculo.id %}" class="btn-eliminar">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">No existen vehículos registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="paginacion">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

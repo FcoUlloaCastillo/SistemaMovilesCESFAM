@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle actividad{% endblock %}
+
+{% block content %}
+
+<section class="card">
+
+    <h2>Detalle de Actividad de Salud</h2>
+
+    <p><strong>Nombre:</strong> {{ actividad.nombre }}</p>
+
+    <p><strong>Descripción:</strong></p>
+
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+        {{ actividad.descripcion }}
+    </div>
+
+    <br>
+
+    <a href="{% url 'listar_actividades' %}" class="btn-secundario">
+        Volver
+    </a>
+
+    <a href="{% url 'editar_actividad' actividad.id %}" class="btn-editar">
+        Editar
+    </a>
+
+</section>
+
+{% endblock %}

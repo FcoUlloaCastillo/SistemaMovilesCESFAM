@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Unidades Solicitantes{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Listado de Unidades Solicitantes</h2>
+
+    <a href="{% url 'crear_unidad' %}" class="btn">
+        Registrar unidad
+    </a>
+
+    <a href="{% url 'exportar_unidades_excel' %}" class="btn-secundario">Exportar Excel</a>
+    <a href="{% url 'exportar_unidades_pdf' %}" class="btn-secundario">Exportar PDF</a>
+
+    <form method="GET" class="buscador">
+    <input 
+        type="text" 
+        name="buscar"
+        placeholder="Buscar por nombre, responsable o correo"
+        value="{{ busqueda }}"
+    >
+
+    <button type="submit" class="btn">Buscar</button>
+
+    <a href="{% url 'listar_unidades' %}" class="btn-secundario">
+        Limpiar
+    </a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Responsable</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for unidad in page_obj %}
+
+            <tr>
+                <td>{{ unidad.nombre }}</td>
+                <td>{{ unidad.responsable }}</td>
+                <td>{{ unidad.telefono_contacto }}</td>
+                <td>{{ unidad.correo_contacto }}</td>
+                <td>{{ unidad.descripcion }}</td>
+
+                <td>
+                    <a href="{% url 'detalle_unidad' unidad.id %}" class="btn-secundario">Detalle</a>
+                    <a href="{% url 'editar_unidad' unidad.id %}" class="btn-editar">Editar</a>
+                    <a href="{% url 'eliminar_unidad' unidad.id %}" class="btn-eliminar">Eliminar</a>
+                </td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="6">
+                    No existen unidades registradas.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+    <div class="paginacion">
+
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">
+                Anterior
+            </a>
+        {% endif %}
+
+        <span>
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">
+                Siguiente
+            </a>
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

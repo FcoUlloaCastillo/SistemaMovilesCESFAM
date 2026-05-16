@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% load l10n %}
+
+{% block title %}Destinos{% endblock %}
+
+{% block content %}
+
+<section class="card">
+
+    <h2>Listado de Destinos</h2>
+
+    <a href="{% url 'crear_destino' %}" class="btn">Registrar destino</a>
+
+    <a href="{% url 'exportar_destinos_excel' %}" class="btn-secundario">Exportar Excel</a>
+    <a href="{% url 'exportar_destinos_pdf' %}" class="btn-secundario">Exportar PDF</a>
+
+    <form method="GET" class="buscador">
+    <input 
+        type="text" 
+        name="buscar"
+        placeholder="Buscar por lugar, dirección o referencia"
+        value="{{ busqueda }}"
+    >
+
+    <button type="submit" class="btn">Buscar</button>
+
+    <a href="{% url 'listar_destinos' %}" class="btn-secundario">
+        Limpiar
+    </a>
+    </form>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Lugar</th>
+                <th>Dirección</th>
+                <th>Referencia</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Mapa</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for destino in page_obj %}
+
+            <tr>
+                <td>{{ destino.nombre_lugar }}</td>
+                <td>{{ destino.direccion }}</td>
+                <td>{{ destino.referencia }}</td>
+                <td>{{ destino.latitud }}</td>
+                <td>{{ destino.longitud }}</td>
+                <td>
+                    {% if destino.latitud and destino.longitud %}
+                        <a 
+                            href="https://www.openstreetmap.org/?mlat={{ destino.latitud|unlocalize }}&mlon={{ destino.longitud|unlocalize }}#map=17/{{ destino.latitud|unlocalize }}/{{ destino.longitud|unlocalize }}" 
+                            target="_blank" 
+                            class="btn-secundario">
+                            Ver mapa
+                        </a>
+                    {% else %}
+                        Sin coordenadas
+                    {% endif %}
+                </td>
+
+                <td>
+                    <a href="{% url 'detalle_destino' destino.id %}" class="btn-secundario">Detalle</a>
+                    <a href="{% url 'editar_destino' destino.id %}" class="btn-editar">Editar</a>
+                    <a href="{% url 'eliminar_destino' destino.id %}" class="btn-eliminar">Eliminar</a>
+                </td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="7">
+                    No existen destinos registrados.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="paginacion">
+
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">
+                Anterior
+            </a>
+        {% endif %}
+
+        <span>
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">
+                Siguiente
+            </a>
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

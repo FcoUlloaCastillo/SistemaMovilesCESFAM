@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>{{ titulo }}</h2>
+
+    <form method="POST" class="formulario">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <p id="mensaje-rut" style="font-weight: bold;"></p>
+
+        <button type="submit" class="btn">Guardar</button>
+        <a href="{% url 'listar_conductores' %}" class="btn-secundario">Volver</a>
+    </form>
+</section>
+
+<script>
+    const rutInput = document.getElementById("id_rut");
+    const mensajeRut = document.getElementById("mensaje-rut");
+
+    function formatearRut(valor) {
+        valor = valor.replace(/\./g, "").replace("-", "").toUpperCase();
+
+        if (valor.length <= 1) {
+            return valor;
+        }
+
+        let cuerpo = valor.slice(0, -1);
+        let dv = valor.slice(-1);
+
+        cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+        return cuerpo + "-" + dv;
+    }
+
+    function validarRut(rut) {
+        rut = rut.replace(/\./g, "").replace("-", "").toUpperCase();
+
+        if (rut.length < 2) {
+            return false;
+        }
+
+        let cuerpo = rut.slice(0, -1);
+        let dv = rut.slice(-1);
+
+        if (!/^\d+$/.test(cuerpo)) {
+            return false;
+        }
+
+        let suma = 0;
+        let multiplo = 2;
+
+        for (let i = cuerpo.length - 1; i >= 0; i--) {
+            suma += parseInt(cuerpo.charAt(i)) * multiplo;
+            multiplo++;
+
+            if (multiplo > 7) {
+                multiplo = 2;
+            }
+        }
+
+        let dvEsperado = 11 - (suma % 11);
+
+        if (dvEsperado === 11) {
+            dvEsperado = "0";
+        } else if (dvEsperado === 10) {
+            dvEsperado = "K";
+        } else {
+            dvEsperado = dvEsperado.toString();
+        }
+
+        return dv === dvEsperado;
+    }
+
+    rutInput.addEventListener("input", function () {
+        rutInput.value = formatearRut(rutInput.value);
+
+        if (rutInput.value.length < 4) {
+            mensajeRut.textContent = "";
+            return;
+        }
+
+        if (validarRut(rutInput.value)) {
+            mensajeRut.textContent = "RUT correcto";
+            mensajeRut.style.color = "green";
+        } else {
+            mensajeRut.textContent = "RUT incorrecto";
+            mensajeRut.style.color = "red";
+        }
+    });
+</script>
+
+{% endblock %}

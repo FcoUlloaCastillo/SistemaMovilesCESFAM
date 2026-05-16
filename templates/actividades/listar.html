@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Actividades de Salud{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Listado de Actividades de Salud</h2>
+
+    <a href="{% url 'crear_actividad' %}" class="btn">Registrar actividad</a>
+
+    <a href="{% url 'exportar_actividades_excel' %}" class="btn-secundario">Exportar Excel</a>
+    <a href="{% url 'exportar_actividades_pdf' %}" class="btn-secundario">Exportar PDF</a>
+
+    <form method="GET" class="buscador">
+    <input 
+        type="text" 
+        name="buscar"
+        placeholder="Buscar por nombre o descripción"
+        value="{{ busqueda }}"
+    >
+
+    <button type="submit" class="btn">Buscar</button>
+
+    <a href="{% url 'listar_actividades' %}" class="btn-secundario">
+        Limpiar
+    </a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre de actividad</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for actividad in page_obj %}
+            <tr>
+                <td>{{ actividad.nombre }}</td>
+                <td>{{ actividad.descripcion }}</td>
+                <td>
+                    <a href="{% url 'detalle_actividad' actividad.id %}" class="btn-secundario">Detalle</a>
+                    <a href="{% url 'editar_actividad' actividad.id %}" class="btn-editar">Editar</a>
+                    <a href="{% url 'eliminar_actividad' actividad.id %}" class="btn-eliminar">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No existen actividades registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="paginacion">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

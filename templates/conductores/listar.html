@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Conductores{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Listado de Conductores</h2>
+
+    <a href="{% url 'crear_conductor' %}" class="btn">Registrar conductor</a>
+
+    <a href="{% url 'exportar_conductores_excel' %}" class="btn-secundario">Exportar Excel</a>
+    <a href="{% url 'exportar_conductores_pdf' %}" class="btn-secundario">Exportar PDF</a>
+
+    <form method="GET" class="buscador">
+
+    <input 
+        type="text" 
+        name="buscar"
+        placeholder="Buscar por nombre, RUT, licencia o estado"
+        value="{{ busqueda }}"
+    >
+
+    <button type="submit" class="btn">
+        Buscar
+    </button>
+
+    <a href="{% url 'listar_conductores' %}" class="btn-secundario">
+        Limpiar
+    </a>
+
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre completo</th>
+                <th>RUT</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Licencia</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for conductor in page_obj %}
+            <tr>
+                <td>{{ conductor.nombre_completo }}</td>
+                <td>{{ conductor.rut }}</td>
+                <td>{{ conductor.telefono }}</td>
+                <td>{{ conductor.correo }}</td>
+                <td>{{ conductor.tipo_licencia }}</td>
+                <td>{{ conductor.estado }}</td>
+                <td>
+                    <a href="{% url 'detalle_conductor' conductor.id %}" class="btn-secundario">Detalle</a>    
+                    <a href="{% url 'editar_conductor' conductor.id %}" class="btn-editar">Editar</a>
+                    <a href="{% url 'eliminar_conductor' conductor.id %}" class="btn-eliminar">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No existen conductores registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="paginacion">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

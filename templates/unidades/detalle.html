@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle unidad{% endblock %}
+
+{% block content %}
+
+<section class="card">
+
+    <h2>Detalle de Unidad Solicitante</h2>
+
+    <p><strong>Nombre:</strong> {{ unidad.nombre }}</p>
+
+    <p><strong>Responsable:</strong> {{ unidad.responsable }}</p>
+
+    <p><strong>Teléfono contacto:</strong> {{ unidad.telefono_contacto }}</p>
+
+    <p><strong>Correo contacto:</strong> {{ unidad.correo_contacto }}</p>
+
+    <p><strong>Descripción:</strong> {{ unidad.descripcion }}</p>
+
+    <a href="{% url 'listar_unidades' %}" class="btn-secundario">
+        Volver
+    </a>
+
+    <a href="{% url 'editar_unidad' unidad.id %}" class="btn-editar">
+        Editar
+    </a>
+
+</section>
+
+{% endblock %}

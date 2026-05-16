@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar conductor{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Confirmar eliminación</h2>
+
+    <p>¿Está seguro que desea eliminar al conductor <strong>{{ conductor.nombre_completo }}</strong>?</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn-eliminar">Sí, eliminar</button>
+        <a href="{% url 'listar_conductores' %}" class="btn-secundario">Cancelar</a>
+    </form>
+</section>
+
+{% endblock %}

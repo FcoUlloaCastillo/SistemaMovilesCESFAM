@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% load l10n %}
+
+{% block title %}Detalle reserva{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<section class="card">
+
+    <h2>Detalle de Reserva</h2>
+
+    <p><strong>Fecha:</strong> {{ reserva.fecha_reserva }}</p>
+
+    <p>
+        <strong>Horario:</strong>
+        {{ reserva.hora_inicio }} - {{ reserva.hora_termino }}
+    </p>
+
+    <p><strong>Vehículo:</strong> {{ reserva.vehiculo }}</p>
+
+    <p><strong>Conductor:</strong> {{ reserva.conductor }}</p>
+
+    <p><strong>Unidad solicitante:</strong> {{ reserva.unidad_solicitante }}</p>
+
+    <p><strong>Actividad:</strong> {{ reserva.actividad }}</p>
+
+    <p><strong>Destino:</strong> {{ reserva.destino }}</p>
+
+    <p><strong>Estado:</strong> {{ reserva.estado }}</p>
+
+    <p><strong>Motivo:</strong> {{ reserva.motivo }}</p>
+
+    <p><strong>Observación:</strong> {{ reserva.observacion }}</p>
+
+    <hr>
+
+    <h3>Ubicación del destino</h3>
+
+    {% if reserva.destino.latitud and reserva.destino.longitud %}
+
+        <div
+            id="mapaReserva"
+            style="height: 400px; width: 100%; border-radius: 10px; border: 1px solid #ccc;">
+        </div>
+
+        <br>
+
+        <a
+            href="https://www.openstreetmap.org/?mlat={{ reserva.destino.latitud|unlocalize }}&mlon={{ reserva.destino.longitud|unlocalize }}#map=17/{{ reserva.destino.latitud|unlocalize }}/{{ reserva.destino.longitud|unlocalize }}"
+            target="_blank"
+            class="btn-secundario">
+            Abrir mapa completo
+        </a>
+
+    {% else %}
+
+        <p>No existen coordenadas registradas para este destino.</p>
+
+    {% endif %}
+
+    <br><br>
+
+    <a href="{% url 'listar_reservas' %}" class="btn-secundario">
+        Volver
+    </a>
+
+    <a href="{% url 'editar_reserva' reserva.id %}" class="btn-editar">
+        Editar
+    </a>
+
+</section>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+{{ reserva.destino.latitud|json_script:"lat-reserva" }}
+{{ reserva.destino.longitud|json_script:"lng-reserva" }}
+{{ reserva.destino.nombre_lugar|json_script:"nombre-reserva" }}
+
+<script>
+    const lat = parseFloat("{{ reserva.destino.latitud|unlocalize }}");
+    const lng = parseFloat("{{ reserva.destino.longitud|unlocalize }}");
+    const nombre = JSON.parse(document.getElementById("nombre-reserva").textContent);
+
+    const mapa = L.map("mapaReserva").setView([lat, lng], 17);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap"
+    }).addTo(mapa);
+
+    L.marker([lat, lng]).addTo(mapa)
+        .bindPopup(nombre)
+        .openPopup();
+
+    setTimeout(function () {
+        mapa.invalidateSize();
+    }, 300);
+</script>
+
+{% endblock %}

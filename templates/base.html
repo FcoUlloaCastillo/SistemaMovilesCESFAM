@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Sistema Móviles CESFAM{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+
+    <header class="header">
+        <h1>Sistema de Gestión de Móviles CESFAM</h1>
+        <p>Control de reservas, vehículos, conductores y actividades de salud</p>
+    </header>
+
+    <nav class="navbar">
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'listar_vehiculos' %}">Vehículos</a>
+        <a href="{% url 'listar_conductores' %}">Conductores</a>
+        <a href="{% url 'listar_unidades' %}">Unidades</a>
+        <a href="{% url 'listar_actividades' %}">Actividades</a>
+        <a href="{% url 'listar_destinos' %}">Destinos</a>
+        <a href="{% url 'listar_reservas' %}">Reservas</a>
+        <a href="/admin/">Admin</a>
+    </nav>
+
+    <main class="container">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mensaje">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <footer class="footer">
+        <p>Proyecto Evaluación 2 - Lenguaje de Programación Web</p>
+    </footer>
+
+</body>
+</html>

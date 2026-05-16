@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle vehículo{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Detalle del Vehículo</h2>
+
+    {% if vehiculo.imagen %}
+        <img src="{{ vehiculo.imagen.url }}" width="250" style="border-radius: 10px; margin-bottom: 20px;">
+    {% endif %}
+
+    <p><strong>Patente:</strong> {{ vehiculo.patente }}</p>
+    <p><strong>Tipo:</strong> {{ vehiculo.tipo }}</p>
+    <p><strong>Marca:</strong> {{ vehiculo.marca }}</p>
+    <p><strong>Modelo:</strong> {{ vehiculo.modelo }}</p>
+    <p><strong>Año:</strong> {{ vehiculo.anio }}</p>
+    <p><strong>Capacidad:</strong> {{ vehiculo.capacidad }}</p>
+    <p><strong>Estado:</strong> {{ vehiculo.estado }}</p>
+    <p><strong>Observación:</strong> {{ vehiculo.observacion }}</p>
+
+    <a href="{% url 'listar_vehiculos' %}" class="btn-secundario">Volver</a>
+    <a href="{% url 'editar_vehiculo' vehiculo.id %}" class="btn-editar">Editar</a>
+</section>
+
+{% endblock %}

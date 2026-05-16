@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar vehículo{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Confirmar eliminación</h2>
+
+    <p>¿Está seguro que desea eliminar el vehículo <strong>{{ vehiculo.patente }}</strong>?</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn-eliminar">Sí, eliminar</button>
+        <a href="{% url 'listar_vehiculos' %}" class="btn-secundario">Cancelar</a>
+    </form>
+</section>
+
+{% endblock %}

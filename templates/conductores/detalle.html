@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle conductor{% endblock %}
+
+{% block content %}
+
+<section class="card">
+
+    <h2>Detalle del Conductor</h2>
+
+    <p><strong>Nombre completo:</strong> {{ conductor.nombre_completo }}</p>
+
+    <p><strong>RUT:</strong> {{ conductor.rut }}</p>
+
+    <p><strong>Teléfono:</strong> {{ conductor.telefono }}</p>
+
+    <p><strong>Correo:</strong> {{ conductor.correo }}</p>
+
+    <p><strong>Tipo licencia:</strong> {{ conductor.tipo_licencia }}</p>
+
+    <p><strong>Estado:</strong> {{ conductor.estado }}</p>
+
+    <a href="{% url 'listar_conductores' %}" class="btn-secundario">
+        Volver
+    </a>
+
+    <a href="{% url 'editar_conductor' conductor.id %}" class="btn-editar">
+        Editar
+    </a>
+
+</section>
+
+{% endblock %}

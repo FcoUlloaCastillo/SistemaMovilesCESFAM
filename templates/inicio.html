@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+
+<section class="card">
+
+    <h2>Panel Principal</h2>
+
+    <p>
+        Plataforma orientada al control y gestión de reservas de móviles
+        institucionales utilizados en establecimientos de salud como
+        CESFAM, CECOSF, SAR y SAPU.
+    </p>
+
+    <div class="dashboard">
+
+        <div class="dashboard-card">
+            <h3>Vehículos</h3>
+            <p>{{ total_vehiculos }}</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Conductores</h3>
+            <p>{{ total_conductores }}</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Unidades</h3>
+            <p>{{ total_unidades }}</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Actividades</h3>
+            <p>{{ total_actividades }}</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Destinos</h3>
+            <p>{{ total_destinos }}</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Reservas</h3>
+            <p>{{ total_reservas }}</p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="card">
+    <h2>Recomendaciones de uso del sistema</h2>
+
+    <details class="acordeon">
+        <summary>Antes de crear una reserva</summary>
+        <ul>
+            <li>Registrar primero vehículos, conductores, unidades, actividades y destinos.</li>
+            <li>Verificar que el vehículo se encuentre disponible.</li>
+            <li>Confirmar que el conductor tenga licencia registrada.</li>
+        </ul>
+    </details>
+
+    <details class="acordeon">
+        <summary>Durante el registro de una reserva</summary>
+        <ul>
+            <li>No ingresar fechas anteriores a la fecha actual.</li>
+            <li>Evitar horarios superpuestos para el mismo vehículo o conductor.</li>
+            <li>Seleccionar correctamente la unidad solicitante, actividad y destino.</li>
+        </ul>
+    </details>
+
+    <details class="acordeon">
+        <summary>Uso de mapas y destinos</summary>
+        <ul>
+            <li>Seleccionar la ubicación desde el mapa al registrar un destino.</li>
+            <li>Verificar que la latitud y longitud se guarden correctamente.</li>
+            <li>Usar “Ver mapa” para confirmar el destino asociado a la reserva.</li>
+        </ul>
+    </details>
+
+    <details class="acordeon">
+        <summary>Estados de reservas y vehículos</summary>
+        <ul>
+            <li>Utilizar “Pendiente” cuando la reserva aún no esté confirmada.</li>
+            <li>Utilizar “Aprobada” cuando la salida esté autorizada.</li>
+            <li>Utilizar “Finalizada” cuando la actividad ya se realizó.</li>
+            <li>Mantener actualizados los estados de los vehículos.</li>
+        </ul>
+    </details>
+</section>
+
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% load l10n %}
+
+{% block title %}Reservas{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>Listado de Reservas de Móviles</h2>
+
+    <a href="{% url 'crear_reserva' %}" class="btn">Registrar reserva</a>
+    <a href="{% url 'exportar_reservas_excel' %}" class="btn-secundario">Exportar Excel</a>
+    <a href="{% url 'exportar_reservas_pdf' %}" class="btn-secundario">Exportar PDF</a>
+
+    <form method="GET" class="buscador">
+    <input 
+        type="text" 
+        name="buscar" 
+        placeholder="Buscar por unidad, actividad, destino o estado"
+        value="{{ busqueda }}"
+    >
+
+    <button type="submit" class="btn">Buscar</button>
+
+    <a href="{% url 'listar_reservas' %}" class="btn-secundario">
+        Limpiar
+    </a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Horario</th>
+                <th>Vehículo</th>
+                <th>Conductor</th>
+                <th>Unidad</th>
+                <th>Actividad</th>
+                <th>Destino</th>
+                <th>Mapa</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for reserva in page_obj %}
+            <tr>
+                <td>{{ reserva.fecha_reserva }}</td>
+                <td>{{ reserva.hora_inicio }} - {{ reserva.hora_termino }}</td>
+                <td>{{ reserva.vehiculo }}</td>
+                <td>{{ reserva.conductor }}</td>
+                <td>{{ reserva.unidad_solicitante }}</td>
+                <td>{{ reserva.actividad }}</td>
+                <td>{{ reserva.destino.nombre_lugar }}</td>
+                <td>
+                    {% if reserva.destino.latitud and reserva.destino.longitud %}
+                        <a 
+                            href="https://www.openstreetmap.org/?mlat={{ reserva.destino.latitud|unlocalize }}&mlon={{ reserva.destino.longitud|unlocalize }}#map=17/{{ reserva.destino.latitud|unlocalize }}/{{ reserva.destino.longitud|unlocalize }}" 
+                            target="_blank" 
+                            class="btn-secundario">
+                            Ver mapa
+                        </a>
+                    {% else %}
+                        Sin coordenadas
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="estado estado-{{ reserva.estado|lower|cut:' ' }}">
+                        {{ reserva.estado }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'detalle_reserva' reserva.id %}" class="btn-secundario">Detalle</a>
+                    <a href="{% url 'editar_reserva' reserva.id %}" class="btn-editar">Editar</a>
+                    <a href="{% url 'eliminar_reserva' reserva.id %}" class="btn-eliminar">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10">No existen reservas registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="paginacion">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

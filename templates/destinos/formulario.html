@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<section class="card">
+
+    <h2>{{ titulo }}</h2>
+
+    <p>
+        Complete los datos del destino y seleccione la ubicación aproximada en el mapa.
+        Al hacer clic sobre el mapa, se completarán automáticamente la latitud y longitud.
+    </p>
+
+    <form method="POST" class="formulario">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <h3>Seleccionar ubicación en el mapa</h3>
+
+        <div 
+            id="map" 
+            style="height: 400px; width: 100%; min-height: 400px; margin: 15px 0 25px 0; border: 1px solid #ccc; border-radius: 10px;">
+        </div>
+
+        <p class="texto-ayuda">
+            La ubicación seleccionada corresponde a una referencia geográfica del destino.
+            No representa seguimiento GPS en tiempo real del móvil.
+        </p>
+
+        <button type="button" class="btn-secundario" onclick="abrirMapa()">
+            Abrir ubicación seleccionada
+        </button>
+
+        <button type="submit" class="btn">
+            Guardar
+        </button>
+
+        <a href="{% url 'listar_destinos' %}" class="btn-secundario">
+            Volver
+        </a>
+
+    </form>
+
+</section>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var latInput = document.getElementById("id_latitud");
+        var lngInput = document.getElementById("id_longitud");
+
+        var latInicial = latInput.value ? parseFloat(latInput.value) : -37.4697300;
+        var lngInicial = lngInput.value ? parseFloat(lngInput.value) : -72.3536600;
+
+        var map = L.map('map').setView([latInicial, lngInicial], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var marker = L.marker([latInicial, lngInicial], {
+            draggable: true
+        }).addTo(map);
+
+        function actualizarCampos(lat, lng) {
+            latInput.value = lat.toFixed(7);
+            lngInput.value = lng.toFixed(7);
+        }
+
+        marker.on('dragend', function () {
+            var posicion = marker.getLatLng();
+            actualizarCampos(posicion.lat, posicion.lng);
+        });
+
+        map.on('click', function (e) {
+            marker.setLatLng(e.latlng);
+            actualizarCampos(e.latlng.lat, e.latlng.lng);
+        });
+
+        window.abrirMapa = function () {
+            if (latInput.value && lngInput.value) {
+                var url = "https://www.openstreetmap.org/?mlat=" + latInput.value +
+                          "&mlon=" + lngInput.value +
+                          "#map=17/" + latInput.value + "/" + lngInput.value;
+
+                window.open(url, "_blank");
+            } else {
+                alert("Primero debe seleccionar una ubicación en el mapa.");
+            }
+        };
+
+        setTimeout(function () {
+            map.invalidateSize();
+        }, 300);
+    });
+</script>
+
+{% endblock %}

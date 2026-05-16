@@ -13,6 +13,88 @@ from .models import Vehiculo, Conductor, UnidadSolicitante, ActividadSalud, Dest
 from .forms import VehiculoForm, ConductorForm, UnidadSolicitanteForm, ActividadSaludForm, DestinoForm, ReservaMovilForm
 
 
+# -------------------------
+# FUNCIONES HELPER PARA FILTRADO
+# -------------------------
+
+def aplicar_filtro_vehiculos(queryset, busqueda):
+    if busqueda:
+        return queryset.filter(
+            patente__icontains=busqueda
+        ) | queryset.filter(
+            tipo__icontains=busqueda
+        ) | queryset.filter(
+            marca__icontains=busqueda
+        ) | queryset.filter(
+            modelo__icontains=busqueda
+        ) | queryset.filter(
+            estado__icontains=busqueda
+        )
+    return queryset
+
+
+def aplicar_filtro_conductores(queryset, busqueda):
+    if busqueda:
+        return queryset.filter(
+            nombre_completo__icontains=busqueda
+        ) | queryset.filter(
+            rut__icontains=busqueda
+        ) | queryset.filter(
+            tipo_licencia__icontains=busqueda
+        ) | queryset.filter(
+            estado__icontains=busqueda
+        )
+    return queryset
+
+
+def aplicar_filtro_unidades(queryset, busqueda):
+    if busqueda:
+        return queryset.filter(
+            nombre__icontains=busqueda
+        ) | queryset.filter(
+            responsable__icontains=busqueda
+        ) | queryset.filter(
+            correo_contacto__icontains=busqueda
+        )
+    return queryset
+
+
+def aplicar_filtro_actividades(queryset, busqueda):
+    if busqueda:
+        return queryset.filter(
+            nombre__icontains=busqueda
+        ) | queryset.filter(
+            descripcion__icontains=busqueda
+        )
+    return queryset
+
+
+def aplicar_filtro_destinos(queryset, busqueda):
+    if busqueda:
+        return queryset.filter(
+            nombre_lugar__icontains=busqueda
+        ) | queryset.filter(
+            direccion__icontains=busqueda
+        ) | queryset.filter(
+            referencia__icontains=busqueda
+        )
+    return queryset
+
+
+def aplicar_filtro_reservas(queryset, busqueda):
+    if busqueda:
+        return queryset.filter(
+            unidad_solicitante__nombre__icontains=busqueda
+        ) | queryset.filter(
+            actividad__nombre__icontains=busqueda
+        ) | queryset.filter(
+            destino__nombre_lugar__icontains=busqueda
+        ) | queryset.filter(
+            estado__icontains=busqueda
+        )
+    return queryset
+
+
 def inicio(request):
     total_vehiculos = Vehiculo.objects.count()
     total_conductores = Conductor.objects.count()
@@ -41,19 +123,7 @@ def listar_vehiculos(request):
     busqueda = request.GET.get('buscar', '')
 
     vehiculos = Vehiculo.objects.all().order_by('id')
-
-    if busqueda:
-        vehiculos = vehiculos.filter(
-            patente__icontains=busqueda
-        ) | vehiculos.filter(
-            tipo__icontains=busqueda
-        ) | vehiculos.filter(
-            marca__icontains=busqueda
-        ) | vehiculos.filter(
-            modelo__icontains=busqueda
-        ) | vehiculos.filter(
-            estado__icontains=busqueda
-        )
+    vehiculos = aplicar_filtro_vehiculos(vehiculos, busqueda)
 
     paginator = Paginator(vehiculos, 5)
     page_number = request.GET.get('page')
@@ -133,17 +203,7 @@ def listar_conductores(request):
     busqueda = request.GET.get('buscar', '')
 
     conductores = Conductor.objects.all().order_by('id')
-
-    if busqueda:
-        conductores = conductores.filter(
-            nombre_completo__icontains=busqueda
-        ) | conductores.filter(
-            rut__icontains=busqueda
-        ) | conductores.filter(
-            tipo_licencia__icontains=busqueda
-        ) | conductores.filter(
-            estado__icontains=busqueda
-        )
+    conductores = aplicar_filtro_conductores(conductores, busqueda)
 
     paginator = Paginator(conductores, 1)
     page_number = request.GET.get('page')
@@ -224,15 +284,7 @@ def listar_unidades(request):
     busqueda = request.GET.get('buscar', '')
 
     unidades = UnidadSolicitante.objects.all().order_by('id')
-
-    if busqueda:
-        unidades = unidades.filter(
-            nombre__icontains=busqueda
-        ) | unidades.filter(
-            responsable__icontains=busqueda
-        ) | unidades.filter(
-            correo_contacto__icontains=busqueda
-        )
+    unidades = aplicar_filtro_unidades(unidades, busqueda)
 
     paginator = Paginator(unidades, 5)
     page_number = request.GET.get('page')
@@ -313,13 +365,7 @@ def listar_actividades(request):
     busqueda = request.GET.get('buscar', '')
 
     actividades = ActividadSalud.objects.all().order_by('id')
-
-    if busqueda:
-        actividades = actividades.filter(
-            nombre__icontains=busqueda
-        ) | actividades.filter(
-            descripcion__icontains=busqueda
-        )
+    actividades = aplicar_filtro_actividades(actividades, busqueda)
 
     paginator = Paginator(actividades, 5)
     page_number = request.GET.get('page')
@@ -400,15 +446,7 @@ def listar_destinos(request):
     busqueda = request.GET.get('buscar', '')
 
     destinos = Destino.objects.all().order_by('id')
-
-    if busqueda:
-        destinos = destinos.filter(
-            nombre_lugar__icontains=busqueda
-        ) | destinos.filter(
-            direccion__icontains=busqueda
-        ) | destinos.filter(
-            referencia__icontains=busqueda
-        )
+    destinos = aplicar_filtro_destinos(destinos, busqueda)
 
     paginator = Paginator(destinos, 5)
     page_number = request.GET.get('page')
@@ -489,17 +527,7 @@ def listar_reservas(request):
     busqueda = request.GET.get('buscar', '')
 
     reservas = ReservaMovil.objects.all().order_by('-fecha_reserva')
-
-    if busqueda:
-        reservas = reservas.filter(
-            unidad_solicitante__nombre__icontains=busqueda
-        ) | reservas.filter(
-            actividad__nombre__icontains=busqueda
-        ) | reservas.filter(
-            destino__nombre_lugar__icontains=busqueda
-        ) | reservas.filter(
-            estado__icontains=busqueda
-        )
+    reservas = aplicar_filtro_reservas(reservas, busqueda)
 
     paginator = Paginator(reservas, 5)
     page_number = request.GET.get('page')
@@ -581,6 +609,8 @@ def eliminar_reserva(request, id):
 
 
 def exportar_vehiculos_excel(request):
+    busqueda = request.GET.get('buscar', '')
+    
     wb = Workbook()
     ws = wb.active
     ws.title = "Vehículos"
@@ -588,6 +618,7 @@ def exportar_vehiculos_excel(request):
     ws.append(['Patente', 'Tipo', 'Marca', 'Modelo', 'Año', 'Capacidad', 'Estado'])
 
     vehiculos = Vehiculo.objects.all()
+    vehiculos = aplicar_filtro_vehiculos(vehiculos, busqueda)
 
     for vehiculo in vehiculos:
         ws.append([
@@ -610,6 +641,8 @@ def exportar_vehiculos_excel(request):
 
 
 def exportar_vehiculos_pdf(request):
+    busqueda = request.GET.get('buscar', '')
+    
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=vehiculos.pdf'
 
@@ -628,6 +661,7 @@ def exportar_vehiculos_pdf(request):
     data = [['Patente', 'Tipo', 'Marca', 'Modelo', 'Año', 'Estado']]
 
     vehiculos = Vehiculo.objects.all()
+    vehiculos = aplicar_filtro_vehiculos(vehiculos, busqueda)
 
     for vehiculo in vehiculos:
         data.append([
@@ -653,6 +687,8 @@ def exportar_vehiculos_pdf(request):
     return response
 
 def exportar_conductores_excel(request):
+    busqueda = request.GET.get('buscar', '')
+    
     wb = Workbook()
     ws = wb.active
     ws.title = "Conductores"
@@ -660,6 +696,7 @@ def exportar_conductores_excel(request):
     ws.append(['Nombre completo', 'RUT', 'Teléfono', 'Correo', 'Tipo licencia', 'Estado'])
 
     conductores = Conductor.objects.all()
+    conductores = aplicar_filtro_conductores(conductores, busqueda)
 
     for conductor in conductores:
         ws.append([
@@ -681,6 +718,8 @@ def exportar_conductores_excel(request):
 
 
 def exportar_conductores_pdf(request):
+    busqueda = request.GET.get('buscar', '')
+    
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=conductores.pdf'
 
@@ -696,6 +735,7 @@ def exportar_conductores_pdf(request):
     data = [['Nombre', 'RUT', 'Teléfono', 'Licencia', 'Estado']]
 
     conductores = Conductor.objects.all()
+    conductores = aplicar_filtro_conductores(conductores, busqueda)
 
     for conductor in conductores:
         data.append([
@@ -720,6 +760,8 @@ def exportar_conductores_pdf(request):
     return response
 
 def exportar_unidades_excel(request):
+    busqueda = request.GET.get('buscar', '')
+    
     wb = Workbook()
     ws = wb.active
     ws.title = "Unidades"
@@ -727,6 +769,7 @@ def exportar_unidades_excel(request):
     ws.append(['Nombre', 'Responsable', 'Teléfono contacto', 'Correo contacto', 'Descripción'])
 
     unidades = UnidadSolicitante.objects.all()
+    unidades = aplicar_filtro_unidades(unidades, busqueda)
 
     for unidad in unidades:
         ws.append([
@@ -747,6 +790,8 @@ def exportar_unidades_excel(request):
 
 
 def exportar_unidades_pdf(request):
+    busqueda = request.GET.get('buscar', '')
+    
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=unidades_solicitantes.pdf'
 
@@ -762,6 +807,7 @@ def exportar_unidades_pdf(request):
     data = [['Nombre', 'Responsable', 'Teléfono', 'Correo']]
 
     unidades = UnidadSolicitante.objects.all()
+    unidades = aplicar_filtro_unidades(unidades, busqueda)
 
     for unidad in unidades:
         data.append([
@@ -785,6 +831,8 @@ def exportar_unidades_pdf(request):
     return response
 
 def exportar_actividades_excel(request):
+    busqueda = request.GET.get('buscar', '')
+    
     wb = Workbook()
     ws = wb.active
     ws.title = "Actividades"
@@ -792,6 +840,7 @@ def exportar_actividades_excel(request):
     ws.append(['Nombre', 'Descripción'])
 
     actividades = ActividadSalud.objects.all()
+    actividades = aplicar_filtro_actividades(actividades, busqueda)
 
     for actividad in actividades:
         ws.append([
@@ -809,6 +858,8 @@ def exportar_actividades_excel(request):
 
 
 def exportar_actividades_pdf(request):
+    busqueda = request.GET.get('buscar', '')
+    
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=actividades_salud.pdf'
 
@@ -824,6 +875,7 @@ def exportar_actividades_pdf(request):
     data = [['Nombre', 'Descripción']]
 
     actividades = ActividadSalud.objects.all()
+    actividades = aplicar_filtro_actividades(actividades, busqueda)
 
     for actividad in actividades:
         data.append([
@@ -845,6 +897,8 @@ def exportar_actividades_pdf(request):
     return response
 
 def exportar_destinos_excel(request):
+    busqueda = request.GET.get('buscar', '')
+    
     wb = Workbook()
     ws = wb.active
     ws.title = "Destinos"
@@ -858,6 +912,7 @@ def exportar_destinos_excel(request):
     ])
 
     destinos = Destino.objects.all()
+    destinos = aplicar_filtro_destinos(destinos, busqueda)
 
     for destino in destinos:
         ws.append([
@@ -880,6 +935,8 @@ def exportar_destinos_excel(request):
 
 
 def exportar_destinos_pdf(request):
+    busqueda = request.GET.get('buscar', '')
+    
     response = HttpResponse(content_type='application/pdf')
 
     response['Content-Disposition'] = 'attachment; filename=destinos.pdf'
@@ -914,6 +971,7 @@ def exportar_destinos_pdf(request):
     ]]
 
     destinos = Destino.objects.all()
+    destinos = aplicar_filtro_destinos(destinos, busqueda)
 
     for destino in destinos:
         data.append([
@@ -940,6 +998,8 @@ def exportar_destinos_pdf(request):
     return response
 
 def exportar_reservas_excel(request):
+    busqueda = request.GET.get('buscar', '')
+    
     wb = Workbook()
     ws = wb.active
     ws.title = "Reservas"
@@ -958,6 +1018,7 @@ def exportar_reservas_excel(request):
     ])
 
     reservas = ReservaMovil.objects.all()
+    reservas = aplicar_filtro_reservas(reservas, busqueda)
 
     for reserva in reservas:
         ws.append([
@@ -983,6 +1044,8 @@ def exportar_reservas_excel(request):
 
 
 def exportar_reservas_pdf(request):
+    busqueda = request.GET.get('buscar', '')
+    
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=reservas_moviles.pdf'
 
@@ -1006,6 +1069,7 @@ def exportar_reservas_pdf(request):
     ]]
 
     reservas = ReservaMovil.objects.all()
+    reservas = aplicar_filtro_reservas(reservas, busqueda)
 
     for reserva in reservas:
         data.append([

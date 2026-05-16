@@ -7,10 +7,15 @@
 <section class="card">
     <h2>Listado de Conductores</h2>
 
-    <a href="{% url 'crear_conductor' %}" class="btn">Registrar conductor</a>
+    <div class="barra-acciones">
+        <a href="{% url 'crear_conductor' %}" class="btn">Registrar conductor</a>
 
-    <a href="{% url 'exportar_conductores_excel' %}" class="btn-secundario">Exportar Excel</a>
-    <a href="{% url 'exportar_conductores_pdf' %}" class="btn-secundario">Exportar PDF</a>
+        <div class="grupo-exportar">
+            <span>Exportar {% if busqueda %}resultados filtrados{% else %}todo{% endif %}</span>
+            <a href="{% url 'exportar_conductores_excel' %}?buscar={{ busqueda|urlencode }}" class="btn-secundario">Excel</a>
+            <a href="{% url 'exportar_conductores_pdf' %}?buscar={{ busqueda|urlencode }}" class="btn-secundario">PDF</a>
+        </div>
+    </div>
 
     <form method="GET" class="buscador">
 
@@ -30,6 +35,12 @@
     </a>
 
     </form>
+
+    {% if busqueda %}
+        <p class="resumen-filtro">
+            Mostrando {{ page_obj.paginator.count }} resultado(s) para "<strong>{{ busqueda }}</strong>".
+        </p>
+    {% endif %}
 
     <table>
         <thead>
@@ -71,13 +82,13 @@
 
     <div class="paginacion">
         {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+            <a href="?buscar={{ busqueda|urlencode }}&page={{ page_obj.previous_page_number }}">Anterior</a>
         {% endif %}
 
         <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+            <a href="?buscar={{ busqueda|urlencode }}&page={{ page_obj.next_page_number }}">Siguiente</a>
         {% endif %}
     </div>
 </section>

@@ -106,6 +106,18 @@ def eliminar_vehiculo(request, id):
     vehiculo = get_object_or_404(Vehiculo, id=id)
 
     if request.method == 'POST':
+        # Validar si el vehículo tiene reservas asociadas
+        reservas_asociadas = ReservaMovil.objects.filter(vehiculo=vehiculo)
+        
+        if reservas_asociadas.exists():
+            messages.error(
+                request, 
+                f'No se puede eliminar el vehículo "{vehiculo.patente}" '
+                f'porque tiene {reservas_asociadas.count()} reserva(s) de móvil asociada(s). '
+                'Debe cancelar o finalizar todas las reservas antes de eliminar.'
+            )
+            return redirect('listar_vehiculos')
+        
         vehiculo.delete()
         messages.success(request, 'Vehículo eliminado correctamente.')
         return redirect('listar_vehiculos')
@@ -183,20 +195,20 @@ def editar_conductor(request, id):
 
 def eliminar_conductor(request, id):
     conductor = get_object_or_404(Conductor, id=id)
-    
-    # Validar si el conductor tiene reservas asociadas
-    reservas_asociadas = ReservaMovil.objects.filter(conductor=conductor)
-    
-    if reservas_asociadas.exists():
-        messages.error(
-            request, 
-            f'No se puede eliminar el conductor "{conductor.nombre_completo}" '
-            f'porque tiene {reservas_asociadas.count()} reserva(s) de móvil asociada(s). '
-            'Debe cancelar o finalizar todas las reservas antes de eliminar.'
-        )
-        return redirect('listar_conductores')
 
     if request.method == 'POST':
+        # Validar si el conductor tiene reservas asociadas
+        reservas_asociadas = ReservaMovil.objects.filter(conductor=conductor)
+        
+        if reservas_asociadas.exists():
+            messages.error(
+                request, 
+                f'No se puede eliminar el conductor "{conductor.nombre_completo}" '
+                f'porque tiene {reservas_asociadas.count()} reserva(s) de móvil asociada(s). '
+                'Debe cancelar o finalizar todas las reservas antes de eliminar.'
+            )
+            return redirect('listar_conductores')
+        
         conductor.delete()
         messages.success(request, 'Conductor eliminado correctamente.')
         return redirect('listar_conductores')
@@ -274,6 +286,18 @@ def eliminar_unidad(request, id):
     unidad = get_object_or_404(UnidadSolicitante, id=id)
 
     if request.method == 'POST':
+        # Validar si la unidad tiene reservas asociadas
+        reservas_asociadas = ReservaMovil.objects.filter(unidad_solicitante=unidad)
+        
+        if reservas_asociadas.exists():
+            messages.error(
+                request, 
+                f'No se puede eliminar la unidad solicitante "{unidad.nombre}" '
+                f'porque tiene {reservas_asociadas.count()} reserva(s) de móvil asociada(s). '
+                'Debe cancelar o finalizar todas las reservas antes de eliminar.'
+            )
+            return redirect('listar_unidades')
+        
         unidad.delete()
         messages.success(request, 'Unidad solicitante eliminada correctamente.')
         return redirect('listar_unidades')
@@ -349,6 +373,18 @@ def eliminar_actividad(request, id):
     actividad = get_object_or_404(ActividadSalud, id=id)
 
     if request.method == 'POST':
+        # Validar si la actividad tiene reservas asociadas
+        reservas_asociadas = ReservaMovil.objects.filter(actividad=actividad)
+        
+        if reservas_asociadas.exists():
+            messages.error(
+                request, 
+                f'No se puede eliminar la actividad "{actividad.nombre}" '
+                f'porque tiene {reservas_asociadas.count()} reserva(s) de móvil asociada(s). '
+                'Debe cancelar o finalizar todas las reservas antes de eliminar.'
+            )
+            return redirect('listar_actividades')
+        
         actividad.delete()
         messages.success(request, 'Actividad eliminada correctamente.')
         return redirect('listar_actividades')
@@ -426,6 +462,18 @@ def eliminar_destino(request, id):
     destino = get_object_or_404(Destino, id=id)
 
     if request.method == 'POST':
+        # Validar si el destino tiene reservas asociadas
+        reservas_asociadas = ReservaMovil.objects.filter(destino=destino)
+        
+        if reservas_asociadas.exists():
+            messages.error(
+                request, 
+                f'No se puede eliminar el destino "{destino.nombre_lugar}" '
+                f'porque tiene {reservas_asociadas.count()} reserva(s) de móvil asociada(s). '
+                'Debe cancelar o finalizar todas las reservas antes de eliminar.'
+            )
+            return redirect('listar_destinos')
+        
         destino.delete()
         messages.success(request, 'Destino eliminado correctamente.')
         return redirect('listar_destinos')

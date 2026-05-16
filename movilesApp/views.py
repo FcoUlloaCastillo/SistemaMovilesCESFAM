@@ -183,6 +183,18 @@ def editar_conductor(request, id):
 
 def eliminar_conductor(request, id):
     conductor = get_object_or_404(Conductor, id=id)
+    
+    # Validar si el conductor tiene reservas asociadas
+    reservas_asociadas = ReservaMovil.objects.filter(conductor=conductor)
+    
+    if reservas_asociadas.exists():
+        messages.error(
+            request, 
+            f'No se puede eliminar el conductor "{conductor.nombre_completo}" '
+            f'porque tiene {reservas_asociadas.count()} reserva(s) de móvil asociada(s). '
+            'Debe cancelar o finalizar todas las reservas antes de eliminar.'
+        )
+        return redirect('listar_conductores')
 
     if request.method == 'POST':
         conductor.delete()

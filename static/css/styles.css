@@ -82,6 +82,10 @@ body {
     margin-bottom: 15px;
 }
 
+.mensaje-oculto {
+    display: none;
+}
+
 .footer {
     text-align: center;
     padding: 15px;

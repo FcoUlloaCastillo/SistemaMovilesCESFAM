@@ -13,7 +13,7 @@
         <strong>{{ unidad.nombre }}</strong>?
     </p>
 
-    <form method="POST">
+    <form method="POST" data-confirm-submit data-confirm-title="Eliminar unidad" data-confirm-text="Esta acción no se puede deshacer." data-confirm-button="Sí, eliminar">
 
         {% csrf_token %}
 

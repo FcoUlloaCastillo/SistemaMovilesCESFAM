@@ -92,7 +92,12 @@
 
                 window.open(url, "_blank");
             } else {
-                alert("Primero debe seleccionar una ubicación en el mapa.");
+                Swal.fire({
+                    icon: "warning",
+                    title: "Ubicación requerida",
+                    text: "Primero debe seleccionar una ubicación en el mapa.",
+                    confirmButtonColor: "#168aad"
+                });
             }
         };
 

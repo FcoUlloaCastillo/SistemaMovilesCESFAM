@@ -124,6 +124,8 @@ class Destino(models.Model):
 
 # Modelo principal que registra la reserva de un móvil institucional.
 class ReservaMovil(models.Model):
+    ESTADOS_BLOQUEAN_RECURSOS = ['Pendiente', 'Aprobada', 'En proceso']
+
     ESTADO_CHOICES = [
         ('Pendiente', 'Pendiente'),
         ('Aprobada', 'Aprobada'),
@@ -148,16 +150,48 @@ class ReservaMovil(models.Model):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
 
+    @classmethod
+    def sincronizar_estado_vehiculo(cls, vehiculo):
+        tiene_reservas_activas = cls.objects.filter(
+            vehiculo=vehiculo,
+            estado__in=cls.ESTADOS_BLOQUEAN_RECURSOS
+        ).exists()
+
+        if tiene_reservas_activas and vehiculo.estado == 'Disponible':
+            vehiculo.estado = 'Reservado'
+            vehiculo.save(update_fields=['estado'])
+
+        if not tiene_reservas_activas and vehiculo.estado == 'Reservado':
+            vehiculo.estado = 'Disponible'
+            vehiculo.save(update_fields=['estado'])
+
     def save(self, *args, **kwargs):
+        vehiculo_anterior = None
+
+        if self.pk:
+            vehiculo_anterior = (
+                ReservaMovil.objects
+                .filter(pk=self.pk)
+                .values_list('vehiculo_id', flat=True)
+                .first()
+            )
+
         super().save(*args, **kwargs)
 
-        if self.estado in ['Aprobada', 'En proceso']:
-            self.vehiculo.estado = 'Reservado'
-            self.vehiculo.save()
+        vehiculos_a_sincronizar = {self.vehiculo_id}
 
-        elif self.estado in ['Finalizada', 'Cancelada']:
-            self.vehiculo.estado = 'Disponible'
-            self.vehiculo.save()
+        if vehiculo_anterior and vehiculo_anterior != self.vehiculo_id:
+            vehiculos_a_sincronizar.add(vehiculo_anterior)
+
+        for vehiculo_id in vehiculos_a_sincronizar:
+            vehiculo = Vehiculo.objects.get(id=vehiculo_id)
+            self.sincronizar_estado_vehiculo(vehiculo)
+
+    def delete(self, *args, **kwargs):
+        vehiculo = self.vehiculo
+        resultado = super().delete(*args, **kwargs)
+        self.sincronizar_estado_vehiculo(vehiculo)
+        return resultado
 
     def __str__(self):
         return f"Reserva {self.id} - {self.unidad_solicitante} - {self.fecha_reserva}"

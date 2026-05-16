@@ -6,6 +6,7 @@
     <title>{% block title %}Sistema Móviles CESFAM{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -29,8 +30,10 @@
 
         {% if messages %}
             {% for message in messages %}
-                <div class="mensaje">
-                    {{ message }}
+                <div
+                    class="mensaje mensaje-oculto"
+                    data-message-tag="{{ message.tags }}"
+                    data-message-text="{{ message|escape }}">
                 </div>
             {% endfor %}
         {% endif %}
@@ -43,6 +46,62 @@
     <footer class="footer">
         <p>Proyecto Evaluación 2 - Lenguaje de Programación Web</p>
     </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const iconos = {
+                success: "success",
+                error: "error",
+                warning: "warning",
+                info: "info",
+                debug: "info"
+            };
+
+            const mensajes = Array.from(document.querySelectorAll(".mensaje-oculto"));
+
+            async function mostrarMensajes() {
+                for (const mensaje of mensajes) {
+                    const etiqueta = (mensaje.dataset.messageTag || "info").split(" ")[0];
+                    const icono = iconos[etiqueta] || "info";
+
+                    await Swal.fire({
+                        icon: icono,
+                        title: icono === "success" ? "Operación exitosa" : "Atención",
+                        text: mensaje.dataset.messageText,
+                        confirmButtonColor: "#168aad"
+                    });
+                }
+            }
+
+            mostrarMensajes();
+
+            document.querySelectorAll("form[data-confirm-submit]").forEach(function (formulario) {
+                formulario.addEventListener("submit", function (evento) {
+                    if (formulario.dataset.confirmed === "true") {
+                        return;
+                    }
+
+                    evento.preventDefault();
+
+                    Swal.fire({
+                        icon: "warning",
+                        title: formulario.dataset.confirmTitle || "Confirmar acción",
+                        text: formulario.dataset.confirmText || "Esta acción no se puede deshacer.",
+                        showCancelButton: true,
+                        confirmButtonText: formulario.dataset.confirmButton || "Sí, continuar",
+                        cancelButtonText: "Cancelar",
+                        confirmButtonColor: "#dc3545",
+                        cancelButtonColor: "#6c757d"
+                    }).then(function (resultado) {
+                        if (resultado.isConfirmed) {
+                            formulario.dataset.confirmed = "true";
+                            formulario.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>

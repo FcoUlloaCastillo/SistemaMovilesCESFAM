@@ -14,7 +14,7 @@
         <strong>{{ reserva.unidad_solicitante }}</strong>?
     </p>
 
-    <form method="POST">
+    <form method="POST" data-confirm-submit data-confirm-title="Eliminar reserva" data-confirm-text="Esta acción liberará la reserva seleccionada." data-confirm-button="Sí, eliminar">
         {% csrf_token %}
 
         <button type="submit" class="btn-eliminar">Sí, eliminar</button>

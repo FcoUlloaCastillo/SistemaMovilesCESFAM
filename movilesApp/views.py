@@ -95,6 +95,19 @@ def aplicar_filtro_reservas(queryset, busqueda):
     return queryset
 
 
+def notificar_errores_formulario(request, form):
+    errores = []
+
+    for campo, lista_errores in form.errors.items():
+        etiqueta = form.fields[campo].label if campo in form.fields else 'Formulario'
+
+        for error in lista_errores:
+            errores.append(f'{etiqueta}: {error}')
+
+    if errores:
+        messages.error(request, 'Revise el formulario. ' + ' '.join(errores))
+
+
 def inicio(request):
     total_vehiculos = Vehiculo.objects.count()
     total_conductores = Conductor.objects.count()
@@ -149,6 +162,7 @@ def crear_vehiculo(request):
             form.save()
             messages.success(request, 'Vehículo registrado correctamente.')
             return redirect('listar_vehiculos')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'vehiculos/formulario.html', {
         'form': form,
@@ -165,6 +179,7 @@ def editar_vehiculo(request, id):
             form.save()
             messages.success(request, 'Vehículo actualizado correctamente.')
             return redirect('listar_vehiculos')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'vehiculos/formulario.html', {
         'form': form,
@@ -230,6 +245,7 @@ def crear_conductor(request):
             form.save()
             messages.success(request, 'Conductor registrado correctamente.')
             return redirect('listar_conductores')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'conductores/formulario.html', {
         'form': form,
@@ -246,6 +262,7 @@ def editar_conductor(request, id):
             form.save()
             messages.success(request, 'Conductor actualizado correctamente.')
             return redirect('listar_conductores')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'conductores/formulario.html', {
         'form': form,
@@ -286,7 +303,7 @@ def listar_unidades(request):
     unidades = UnidadSolicitante.objects.all().order_by('id')
     unidades = aplicar_filtro_unidades(unidades, busqueda)
 
-    paginator = Paginator(unidades, 5)
+    paginator = Paginator(unidades, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -311,6 +328,7 @@ def crear_unidad(request):
             form.save()
             messages.success(request, 'Unidad solicitante registrada correctamente.')
             return redirect('listar_unidades')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'unidades/formulario.html', {
         'form': form,
@@ -327,6 +345,7 @@ def editar_unidad(request, id):
             form.save()
             messages.success(request, 'Unidad solicitante actualizada correctamente.')
             return redirect('listar_unidades')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'unidades/formulario.html', {
         'form': form,
@@ -367,7 +386,7 @@ def listar_actividades(request):
     actividades = ActividadSalud.objects.all().order_by('id')
     actividades = aplicar_filtro_actividades(actividades, busqueda)
 
-    paginator = Paginator(actividades, 5)
+    paginator = Paginator(actividades, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -392,6 +411,7 @@ def crear_actividad(request):
             form.save()
             messages.success(request, 'Actividad registrada correctamente.')
             return redirect('listar_actividades')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'actividades/formulario.html', {
         'form': form,
@@ -408,6 +428,7 @@ def editar_actividad(request, id):
             form.save()
             messages.success(request, 'Actividad actualizada correctamente.')
             return redirect('listar_actividades')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'actividades/formulario.html', {
         'form': form,
@@ -448,7 +469,7 @@ def listar_destinos(request):
     destinos = Destino.objects.all().order_by('id')
     destinos = aplicar_filtro_destinos(destinos, busqueda)
 
-    paginator = Paginator(destinos, 5)
+    paginator = Paginator(destinos, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -473,6 +494,7 @@ def crear_destino(request):
             form.save()
             messages.success(request, 'Destino registrado correctamente.')
             return redirect('listar_destinos')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'destinos/formulario.html', {
         'form': form,
@@ -489,6 +511,7 @@ def editar_destino(request, id):
             form.save()
             messages.success(request, 'Destino actualizado correctamente.')
             return redirect('listar_destinos')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'destinos/formulario.html', {
         'form': form,
@@ -574,6 +597,7 @@ def crear_reserva(request):
             form.save()
             messages.success(request, 'Reserva registrada correctamente.')
             return redirect('listar_reservas')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'reservas/formulario.html', {
         'form': form,
@@ -590,6 +614,7 @@ def editar_reserva(request, id):
             form.save()
             messages.success(request, 'Reserva actualizada correctamente.')
             return redirect('listar_reservas')
+        notificar_errores_formulario(request, form)
 
     return render(request, 'reservas/formulario.html', {
         'form': form,

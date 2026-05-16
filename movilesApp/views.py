@@ -138,7 +138,7 @@ def listar_vehiculos(request):
     vehiculos = Vehiculo.objects.all().order_by('id')
     vehiculos = aplicar_filtro_vehiculos(vehiculos, busqueda)
 
-    paginator = Paginator(vehiculos, 5)
+    paginator = Paginator(vehiculos, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -207,7 +207,7 @@ def eliminar_vehiculo(request, id):
         messages.success(request, 'Vehículo eliminado correctamente.')
         return redirect('listar_vehiculos')
 
-    return render(request, 'vehiculos/confirmar_eliminar.html', {'vehiculo': vehiculo})
+    return redirect('listar_vehiculos')
 
 
 # -------------------------
@@ -290,7 +290,7 @@ def eliminar_conductor(request, id):
         messages.success(request, 'Conductor eliminado correctamente.')
         return redirect('listar_conductores')
 
-    return render(request, 'conductores/confirmar_eliminar.html', {'conductor': conductor})
+    return redirect('listar_conductores')
 
 
 # -------------------------
@@ -373,7 +373,7 @@ def eliminar_unidad(request, id):
         messages.success(request, 'Unidad solicitante eliminada correctamente.')
         return redirect('listar_unidades')
 
-    return render(request, 'unidades/confirmar_eliminar.html', {'unidad': unidad})
+    return redirect('listar_unidades')
 
 
 # -------------------------
@@ -456,7 +456,7 @@ def eliminar_actividad(request, id):
         messages.success(request, 'Actividad eliminada correctamente.')
         return redirect('listar_actividades')
 
-    return render(request, 'actividades/confirmar_eliminar.html', {'actividad': actividad})
+    return redirect('listar_actividades')
 
 
 # -------------------------
@@ -539,7 +539,7 @@ def eliminar_destino(request, id):
         messages.success(request, 'Destino eliminado correctamente.')
         return redirect('listar_destinos')
 
-    return render(request, 'destinos/confirmar_eliminar.html', {'destino': destino})
+    return redirect('listar_destinos')
 
 
 # -------------------------
@@ -552,7 +552,7 @@ def listar_reservas(request):
     reservas = ReservaMovil.objects.all().order_by('-fecha_reserva')
     reservas = aplicar_filtro_reservas(reservas, busqueda)
 
-    paginator = Paginator(reservas, 5)
+    paginator = Paginator(reservas, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -630,7 +630,7 @@ def eliminar_reserva(request, id):
         messages.success(request, 'Reserva eliminada correctamente.')
         return redirect('listar_reservas')
 
-    return render(request, 'reservas/confirmar_eliminar.html', {'reserva': reserva})
+    return redirect('listar_reservas')
 
 
 def exportar_vehiculos_excel(request):

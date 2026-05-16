@@ -60,10 +60,13 @@
                         Sin imagen
                     {% endif %}
                 </td>
-                <td>
+                <td class="acciones-tabla">
                     <a href="{% url 'detalle_vehiculo' vehiculo.id %}" class="btn-secundario">Detalle</a>
                     <a href="{% url 'editar_vehiculo' vehiculo.id %}" class="btn-editar">Editar</a>
-                    <a href="{% url 'eliminar_vehiculo' vehiculo.id %}" class="btn-eliminar">Eliminar</a>
+                    <form method="POST" action="{% url 'eliminar_vehiculo' vehiculo.id %}" class="form-eliminar" data-confirm-submit data-confirm-title="Eliminar vehículo" data-confirm-text="Se eliminará el vehículo {{ vehiculo.patente }}." data-confirm-button="Sí, eliminar">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-eliminar">Eliminar</button>
+                    </form>
                 </td>
             </tr>
             {% empty %}

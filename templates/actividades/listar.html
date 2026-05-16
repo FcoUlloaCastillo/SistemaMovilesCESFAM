@@ -41,10 +41,13 @@
             <tr>
                 <td>{{ actividad.nombre }}</td>
                 <td>{{ actividad.descripcion }}</td>
-                <td>
+                <td class="acciones-tabla">
                     <a href="{% url 'detalle_actividad' actividad.id %}" class="btn-secundario">Detalle</a>
                     <a href="{% url 'editar_actividad' actividad.id %}" class="btn-editar">Editar</a>
-                    <a href="{% url 'eliminar_actividad' actividad.id %}" class="btn-eliminar">Eliminar</a>
+                    <form method="POST" action="{% url 'eliminar_actividad' actividad.id %}" class="form-eliminar" data-confirm-submit data-confirm-title="Eliminar actividad" data-confirm-text="Se eliminará la actividad {{ actividad.nombre }}." data-confirm-button="Sí, eliminar">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-eliminar">Eliminar</button>
+                    </form>
                 </td>
             </tr>
             {% empty %}

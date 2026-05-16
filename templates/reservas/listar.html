@@ -71,10 +71,13 @@
                         {{ reserva.estado }}
                     </span>
                 </td>
-                <td>
+                <td class="acciones-tabla">
                     <a href="{% url 'detalle_reserva' reserva.id %}" class="btn-secundario">Detalle</a>
                     <a href="{% url 'editar_reserva' reserva.id %}" class="btn-editar">Editar</a>
-                    <a href="{% url 'eliminar_reserva' reserva.id %}" class="btn-eliminar">Eliminar</a>
+                    <form method="POST" action="{% url 'eliminar_reserva' reserva.id %}" class="form-eliminar" data-confirm-submit data-confirm-title="Eliminar reserva" data-confirm-text="Se eliminará la reserva de {{ reserva.unidad_solicitante }} para el {{ reserva.fecha_reserva }}." data-confirm-button="Sí, eliminar">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-eliminar">Eliminar</button>
+                    </form>
                 </td>
             </tr>
             {% empty %}

@@ -146,6 +146,15 @@ td {
     color: white;
 }
 
+.acciones-tabla {
+    white-space: nowrap;
+}
+
+.form-eliminar {
+    display: inline-block;
+    margin: 0;
+}
+
 .formulario p {
     margin-bottom: 15px;
 }

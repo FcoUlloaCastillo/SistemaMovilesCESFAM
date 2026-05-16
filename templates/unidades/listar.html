@@ -52,10 +52,13 @@
                 <td>{{ unidad.correo_contacto }}</td>
                 <td>{{ unidad.descripcion }}</td>
 
-                <td>
+                <td class="acciones-tabla">
                     <a href="{% url 'detalle_unidad' unidad.id %}" class="btn-secundario">Detalle</a>
                     <a href="{% url 'editar_unidad' unidad.id %}" class="btn-editar">Editar</a>
-                    <a href="{% url 'eliminar_unidad' unidad.id %}" class="btn-eliminar">Eliminar</a>
+                    <form method="POST" action="{% url 'eliminar_unidad' unidad.id %}" class="form-eliminar" data-confirm-submit data-confirm-title="Eliminar unidad" data-confirm-text="Se eliminará la unidad {{ unidad.nombre }}." data-confirm-button="Sí, eliminar">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-eliminar">Eliminar</button>
+                    </form>
                 </td>
             </tr>
 

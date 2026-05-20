@@ -16,14 +16,29 @@
     </header>
 
     <nav class="navbar">
-        <a href="{% url 'inicio' %}">Inicio</a>
-        <a href="{% url 'listar_vehiculos' %}">Vehículos</a>
-        <a href="{% url 'listar_conductores' %}">Conductores</a>
-        <a href="{% url 'listar_unidades' %}">Unidades</a>
-        <a href="{% url 'listar_actividades' %}">Actividades</a>
-        <a href="{% url 'listar_destinos' %}">Destinos</a>
-        <a href="{% url 'listar_reservas' %}">Reservas</a>
-        <a href="/admin/">Admin</a>
+        <div class="navbar-izquierda">
+            <a href="{% url 'inicio' %}">Inicio</a>
+            <a href="{% url 'listar_vehiculos' %}">Vehículos</a>
+            <a href="{% url 'listar_conductores' %}">Conductores</a>
+            <a href="{% url 'listar_unidades' %}">Unidades</a>
+            <a href="{% url 'listar_actividades' %}">Actividades</a>
+            <a href="{% url 'listar_destinos' %}">Destinos</a>
+            <a href="{% url 'listar_reservas' %}">Reservas</a>
+            {% if user.is_superuser %}
+                <a href="/admin/">🔐 Admin</a>
+            {% endif %}
+        </div>
+        <div class="navbar-derecha">
+            {% if user.is_authenticated %}
+                <span class="usuario-info">👤 {{ user.username }}</span>
+                <form method="POST" action="{% url 'cerrar_sesion' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-logout">Cerrar Sesión</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar Sesión</a>
+            {% endif %}
+        </div>
     </nav>
 
     <main class="container">

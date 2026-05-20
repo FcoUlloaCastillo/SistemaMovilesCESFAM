@@ -8,7 +8,9 @@
     <h2>Listado de Actividades de Salud</h2>
 
     <div class="barra-acciones">
-        <a href="{% url 'crear_actividad' %}" class="btn">Registrar actividad</a>
+        {% if puede_editar %}
+            <a href="{% url 'crear_actividad' %}" class="btn">Registrar actividad</a>
+        {% endif %}
 
         <div class="grupo-exportar">
             <span>Exportar {% if busqueda %}resultados filtrados{% else %}todo{% endif %}</span>
@@ -54,11 +56,13 @@
                 <td>{{ actividad.descripcion }}</td>
                 <td class="acciones-tabla">
                     <a href="{% url 'detalle_actividad' actividad.id %}" class="btn-secundario">Detalle</a>
-                    <a href="{% url 'editar_actividad' actividad.id %}" class="btn-editar">Editar</a>
-                    <form method="POST" action="{% url 'eliminar_actividad' actividad.id %}" class="form-eliminar" data-confirm-submit data-confirm-title="Eliminar actividad" data-confirm-text="Se eliminará la actividad {{ actividad.nombre }}." data-confirm-button="Sí, eliminar">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-eliminar">Eliminar</button>
-                    </form>
+                    {% if puede_editar %}
+                        <a href="{% url 'editar_actividad' actividad.id %}" class="btn-editar">Editar</a>
+                        <form method="POST" action="{% url 'eliminar_actividad' actividad.id %}" class="form-eliminar" data-confirm-submit data-confirm-title="Eliminar actividad" data-confirm-text="Se eliminará la actividad {{ actividad.nombre }}." data-confirm-button="Sí, eliminar">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-eliminar">Eliminar</button>
+                        </form>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}

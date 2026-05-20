@@ -1,16 +1,155 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import never_cache
+from django.http import HttpResponse, HttpResponseForbidden
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.core.exceptions import ValidationError
 from openpyxl import Workbook
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from datetime import datetime
+import re
 
 from .models import Vehiculo, Conductor, UnidadSolicitante, ActividadSalud, Destino, ReservaMovil
 from .forms import VehiculoForm, ConductorForm, UnidadSolicitanteForm, ActividadSaludForm, DestinoForm, ReservaMovilForm
+
+
+# -------------------------
+# DECORADOR PERSONALIZADO PARA VERIFICAR PERMISOS DE EDICIÓN/ELIMINACIÓN
+# -------------------------
+
+def solo_lectura(view_func):
+    """Decorador que restringe acceso a vistas de edición/eliminación para usuarios con permisos limitados."""
+    def wrapper(request, *args, **kwargs):
+        # El superusuario y staff pueden acceder a todo
+        if request.user.is_superuser or request.user.is_staff:
+            return view_func(request, *args, **kwargs)
+        
+        # Verificar si el usuario tiene el grupo 'solo_lectura'
+        if request.user.groups.filter(name='solo_lectura').exists():
+            messages.error(request, 'No tienes permiso para realizar esta acción. Tu cuenta tiene acceso de solo lectura.')
+            return redirect('inicio')
+        
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def requerir_autenticacion(view_func):
+    """Decorador que combina login_required con never_cache."""
+    def wrapper(request, *args, **kwargs):
+        return never_cache(login_required(view_func))(request, *args, **kwargs)
+    return wrapper
+
+
+# -------------------------
+# VISTAS DE AUTENTICACIÓN
+# -------------------------
+
+@never_cache
+@require_http_methods(["GET", "POST"])
+def login_usuario(request):
+    """Vista para iniciar sesión."""
+    if request.user.is_authenticated:
+        return redirect('inicio')
+
+    from django.contrib.auth.forms import AuthenticationForm
+    form = AuthenticationForm()
+    
+    if request.method == 'POST':
+        usuario = request.POST.get('username', '').strip()
+        contraseña = request.POST.get('password', '').strip()
+        
+        # Validaciones rigurosas
+        if not usuario or not contraseña:
+            messages.error(request, 'El usuario y la contraseña son requeridos.')
+            return render(request, 'autenticacion/login.html', {'form': form})
+        
+        # Autenticar usuario
+        user = authenticate(request, username=usuario, password=contraseña)
+        
+        if user is not None:
+            # Registrar el inicio de sesión
+            login(request, user)
+            messages.success(request, f'Bienvenido, {user.username}!')
+            return redirect('inicio')
+        else:
+            messages.error(request, 'Usuario o contraseña incorrectos.')
+    
+    return render(request, 'autenticacion/login.html', {'form': form})
+
+
+@never_cache
+@require_http_methods(["GET", "POST"])
+def registro_usuario(request):
+    """Vista para registrar nuevo usuario."""
+    if request.user.is_authenticated:
+        return redirect('inicio')
+    
+    if request.method == 'POST':
+        usuario = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password1 = request.POST.get('password1', '').strip()
+        password2 = request.POST.get('password2', '').strip()
+        
+        # Validaciones rigurosas
+        errores = []
+        
+        if not usuario:
+            errores.append('El usuario es requerido.')
+        elif len(usuario) > 150:
+            errores.append('El usuario no puede exceder 150 caracteres.')
+        elif not re.match(r'^[\w.@+-]+$', usuario):
+            errores.append('El usuario contiene caracteres inválidos.')
+        elif User.objects.filter(username=usuario).exists():
+            errores.append('El usuario ya existe.')
+        
+        if not email:
+            errores.append('El correo electrónico es requerido.')
+        elif not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+            errores.append('El correo electrónico es inválido.')
+        elif User.objects.filter(email=email).exists():
+            errores.append('El correo electrónico ya está registrado.')
+        
+        if not password1:
+            errores.append('La contraseña es requerida.')
+        elif len(password1) < 8:
+            errores.append('La contraseña debe tener al menos 8 caracteres.')
+        
+        if password1 != password2:
+            errores.append('Las contraseñas no coinciden.')
+        
+        if errores:
+            for error in errores:
+                messages.error(request, error)
+            return render(request, 'autenticacion/registro.html')
+        
+        # Crear usuario
+        user = User.objects.create_user(
+            username=usuario,
+            email=email,
+            password=password1
+        )
+        messages.success(request, f'Cuenta creada exitosamente, {usuario}. Por favor inicia sesión.')
+        return redirect('login')
+    
+    from django.contrib.auth.forms import UserCreationForm
+    form = UserCreationForm()
+    return render(request, 'autenticacion/registro.html', {'form': form})
+
+
+@never_cache
+@require_http_methods(["POST"])
+@login_required(login_url='login')
+def cerrar_sesion_usuario(request):
+    """Vista para cerrar sesión."""
+    logout(request)
+    return redirect('login')
 
 
 # -------------------------
@@ -108,6 +247,8 @@ def notificar_errores_formulario(request, form):
         messages.error(request, 'Revise el formulario. ' + ' '.join(errores))
 
 
+@never_cache
+@login_required(login_url='login')
 def inicio(request):
     total_vehiculos = Vehiculo.objects.count()
     total_conductores = Conductor.objects.count()
@@ -132,6 +273,8 @@ def inicio(request):
 # CRUD VEHICULO
 # -------------------------
 
+@never_cache
+@login_required(login_url='login')
 def listar_vehiculos(request):
     busqueda = request.GET.get('buscar', '')
 
@@ -147,6 +290,8 @@ def listar_vehiculos(request):
         'busqueda': busqueda
     })
 
+@never_cache
+@login_required(login_url='login')
 def detalle_vehiculo(request, id):
     vehiculo = get_object_or_404(Vehiculo, id=id)
     return render(request, 'vehiculos/detalle.html', {
@@ -154,6 +299,9 @@ def detalle_vehiculo(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def crear_vehiculo(request):
     form = VehiculoForm(request.POST or None, request.FILES or None)
 
@@ -170,6 +318,9 @@ def crear_vehiculo(request):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def editar_vehiculo(request, id):
     vehiculo = get_object_or_404(Vehiculo, id=id)
     form = VehiculoForm(request.POST or None, request.FILES or None, instance=vehiculo)
@@ -187,6 +338,9 @@ def editar_vehiculo(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def eliminar_vehiculo(request, id):
     vehiculo = get_object_or_404(Vehiculo, id=id)
 
@@ -214,6 +368,8 @@ def eliminar_vehiculo(request, id):
 # CRUD CONDUCTOR
 # -------------------------
 
+@never_cache
+@login_required(login_url='login')
 def listar_conductores(request):
     busqueda = request.GET.get('buscar', '')
 
@@ -229,6 +385,8 @@ def listar_conductores(request):
         'busqueda': busqueda
     })
 
+@never_cache
+@login_required(login_url='login')
 def detalle_conductor(request, id):
     conductor = get_object_or_404(Conductor, id=id)
 
@@ -237,6 +395,9 @@ def detalle_conductor(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def crear_conductor(request):
     form = ConductorForm(request.POST or None)
 
@@ -253,6 +414,9 @@ def crear_conductor(request):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def editar_conductor(request, id):
     conductor = get_object_or_404(Conductor, id=id)
     form = ConductorForm(request.POST or None, instance=conductor)
@@ -270,6 +434,9 @@ def editar_conductor(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def eliminar_conductor(request, id):
     conductor = get_object_or_404(Conductor, id=id)
 
@@ -297,6 +464,8 @@ def eliminar_conductor(request, id):
 # CRUD UNIDAD SOLICITANTE
 # -------------------------
 
+@never_cache
+@login_required(login_url='login')
 def listar_unidades(request):
     busqueda = request.GET.get('buscar', '')
 
@@ -312,6 +481,8 @@ def listar_unidades(request):
         'busqueda': busqueda
     })
 
+@never_cache
+@login_required(login_url='login')
 def detalle_unidad(request, id):
     unidad = get_object_or_404(UnidadSolicitante, id=id)
 
@@ -320,6 +491,9 @@ def detalle_unidad(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def crear_unidad(request):
     form = UnidadSolicitanteForm(request.POST or None)
 
@@ -336,6 +510,9 @@ def crear_unidad(request):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def editar_unidad(request, id):
     unidad = get_object_or_404(UnidadSolicitante, id=id)
     form = UnidadSolicitanteForm(request.POST or None, instance=unidad)
@@ -353,6 +530,9 @@ def editar_unidad(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def eliminar_unidad(request, id):
     unidad = get_object_or_404(UnidadSolicitante, id=id)
 
@@ -380,6 +560,8 @@ def eliminar_unidad(request, id):
 # CRUD ACTIVIDAD DE SALUD
 # -------------------------
 
+@never_cache
+@login_required(login_url='login')
 def listar_actividades(request):
     busqueda = request.GET.get('buscar', '')
 
@@ -395,6 +577,8 @@ def listar_actividades(request):
         'busqueda': busqueda
     })
 
+@never_cache
+@login_required(login_url='login')
 def detalle_actividad(request, id):
     actividad = get_object_or_404(ActividadSalud, id=id)
 
@@ -403,6 +587,9 @@ def detalle_actividad(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def crear_actividad(request):
     form = ActividadSaludForm(request.POST or None)
 
@@ -419,6 +606,9 @@ def crear_actividad(request):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def editar_actividad(request, id):
     actividad = get_object_or_404(ActividadSalud, id=id)
     form = ActividadSaludForm(request.POST or None, instance=actividad)
@@ -436,6 +626,9 @@ def editar_actividad(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def eliminar_actividad(request, id):
     actividad = get_object_or_404(ActividadSalud, id=id)
 
@@ -463,6 +656,8 @@ def eliminar_actividad(request, id):
 # CRUD DESTINO
 # -------------------------
 
+@never_cache
+@login_required(login_url='login')
 def listar_destinos(request):
     busqueda = request.GET.get('buscar', '')
 
@@ -478,6 +673,8 @@ def listar_destinos(request):
         'busqueda': busqueda
     })
 
+@never_cache
+@login_required(login_url='login')
 def detalle_destino(request, id):
     destino = get_object_or_404(Destino, id=id)
 
@@ -486,6 +683,9 @@ def detalle_destino(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def crear_destino(request):
     form = DestinoForm(request.POST or None)
 
@@ -502,6 +702,9 @@ def crear_destino(request):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def editar_destino(request, id):
     destino = get_object_or_404(Destino, id=id)
     form = DestinoForm(request.POST or None, instance=destino)
@@ -519,6 +722,9 @@ def editar_destino(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def eliminar_destino(request, id):
     destino = get_object_or_404(Destino, id=id)
 
@@ -546,6 +752,8 @@ def eliminar_destino(request, id):
 # CRUD RESERVA MOVIL
 # -------------------------
 
+@never_cache
+@login_required(login_url='login')
 def listar_reservas(request):
     busqueda = request.GET.get('buscar', '')
 
@@ -561,6 +769,8 @@ def listar_reservas(request):
         'busqueda': busqueda
     })
 
+@never_cache
+@login_required(login_url='login')
 def detalle_reserva(request, id):
     reserva = get_object_or_404(ReservaMovil, id=id)
 
@@ -568,7 +778,9 @@ def detalle_reserva(request, id):
         'reserva': reserva
     })
 
-
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def crear_reserva(request):
     if not Vehiculo.objects.exists():
         messages.warning(request, 'Debe registrar al menos un vehículo antes de crear una reserva.')
@@ -605,6 +817,9 @@ def crear_reserva(request):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def editar_reserva(request, id):
     reserva = get_object_or_404(ReservaMovil, id=id)
     form = ReservaMovilForm(request.POST or None, instance=reserva)
@@ -622,6 +837,9 @@ def editar_reserva(request, id):
     })
 
 
+@never_cache
+@login_required(login_url='login')
+@solo_lectura
 def eliminar_reserva(request, id):
     reserva = get_object_or_404(ReservaMovil, id=id)
 
@@ -633,6 +851,8 @@ def eliminar_reserva(request, id):
     return redirect('listar_reservas')
 
 
+@never_cache
+@login_required(login_url='login')
 def exportar_vehiculos_excel(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -665,6 +885,8 @@ def exportar_vehiculos_excel(request):
     return response
 
 
+@never_cache
+@login_required(login_url='login')
 def exportar_vehiculos_pdf(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -711,6 +933,8 @@ def exportar_vehiculos_pdf(request):
 
     return response
 
+@never_cache
+@login_required(login_url='login')
 def exportar_conductores_excel(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -742,6 +966,8 @@ def exportar_conductores_excel(request):
     return response
 
 
+@never_cache
+@login_required(login_url='login')
 def exportar_conductores_pdf(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -784,6 +1010,8 @@ def exportar_conductores_pdf(request):
 
     return response
 
+@never_cache
+@login_required(login_url='login')
 def exportar_unidades_excel(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -814,6 +1042,8 @@ def exportar_unidades_excel(request):
     return response
 
 
+@never_cache
+@login_required(login_url='login')
 def exportar_unidades_pdf(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -855,6 +1085,8 @@ def exportar_unidades_pdf(request):
 
     return response
 
+@never_cache
+@login_required(login_url='login')
 def exportar_actividades_excel(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -882,6 +1114,8 @@ def exportar_actividades_excel(request):
     return response
 
 
+@never_cache
+@login_required(login_url='login')
 def exportar_actividades_pdf(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -921,6 +1155,8 @@ def exportar_actividades_pdf(request):
 
     return response
 
+@never_cache
+@login_required(login_url='login')
 def exportar_destinos_excel(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -959,6 +1195,8 @@ def exportar_destinos_excel(request):
     return response
 
 
+@never_cache
+@login_required(login_url='login')
 def exportar_destinos_pdf(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -1022,6 +1260,8 @@ def exportar_destinos_pdf(request):
 
     return response
 
+@never_cache
+@login_required(login_url='login')
 def exportar_reservas_excel(request):
     busqueda = request.GET.get('buscar', '')
     
@@ -1068,6 +1308,8 @@ def exportar_reservas_excel(request):
     return response
 
 
+@never_cache
+@login_required(login_url='login')
 def exportar_reservas_pdf(request):
     busqueda = request.GET.get('buscar', '')
     

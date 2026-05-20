@@ -10,7 +10,9 @@
     <h2>Listado de Reservas de Móviles</h2>
 
     <div class="barra-acciones">
-        <a href="{% url 'crear_reserva' %}" class="btn">Registrar reserva</a>
+        {% if puede_editar %}
+            <a href="{% url 'crear_reserva' %}" class="btn">Registrar reserva</a>
+        {% endif %}
 
         <div class="grupo-exportar">
             <span>Exportar {% if busqueda %}resultados filtrados{% else %}todo{% endif %}</span>
@@ -85,11 +87,13 @@
                 </td>
                 <td class="acciones-tabla">
                     <a href="{% url 'detalle_reserva' reserva.id %}" class="btn-secundario">Detalle</a>
-                    <a href="{% url 'editar_reserva' reserva.id %}" class="btn-editar">Editar</a>
-                    <form method="POST" action="{% url 'eliminar_reserva' reserva.id %}" class="form-eliminar" data-confirm-submit data-confirm-title="Eliminar reserva" data-confirm-text="Se eliminará la reserva de {{ reserva.unidad_solicitante }} para el {{ reserva.fecha_reserva }}." data-confirm-button="Sí, eliminar">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-eliminar">Eliminar</button>
-                    </form>
+                    {% if puede_editar %}
+                        <a href="{% url 'editar_reserva' reserva.id %}" class="btn-editar">Editar</a>
+                        <form method="POST" action="{% url 'eliminar_reserva' reserva.id %}" class="form-eliminar" data-confirm-submit data-confirm-title="Eliminar reserva" data-confirm-text="Se eliminará la reserva de {{ reserva.unidad_solicitante }} para el {{ reserva.fecha_reserva }}." data-confirm-button="Sí, eliminar">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-eliminar">Eliminar</button>
+                        </form>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}

@@ -62,6 +62,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'movilesApp.context_processors.permisos_edicion',
             ],
         },
     },
@@ -126,3 +127,23 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# -------------------------
+# AUTENTICACIÓN Y SEGURIDAD
+# -------------------------
+
+# URLs de autenticación
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'inicio'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Seguridad de sesión
+SESSION_COOKIE_SECURE = False  # Cambiar a True en producción
+CSRF_COOKIE_SECURE = False  # Cambiar a True en producción
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600  # 1 hora en segundos
+
+# Seguridad adicional
+SECURE_HSTS_SECONDS = 0  # Cambiar a 31536000 en producción
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_SSL_REDIRECT = False  # Cambiar a True en producción

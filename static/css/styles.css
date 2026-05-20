@@ -26,8 +26,26 @@ body {
 
 .navbar {
     background: #084c61;
-    padding: 12px;
-    text-align: center;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.navbar-izquierda {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.navbar-derecha {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .navbar a {
@@ -35,10 +53,34 @@ body {
     text-decoration: none;
     margin: 0 10px;
     font-weight: bold;
+    transition: color 0.3s ease;
 }
 
 .navbar a:hover {
+    color: #a8dadc;
     text-decoration: underline;
+}
+
+.usuario-info {
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.btn-logout {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 14px;
+}
+
+.btn-logout:hover {
+    background: #c0392b;
 }
 
 .container {

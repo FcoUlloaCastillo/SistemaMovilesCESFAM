@@ -24,9 +24,11 @@
         Volver
     </a>
 
-    <a href="{% url 'editar_conductor' conductor.id %}" class="btn-editar">
-        Editar
-    </a>
+    {% if puede_editar %}
+        <a href="{% url 'editar_conductor' conductor.id %}" class="btn-editar">
+            Editar
+        </a>
+    {% endif %}
 
 </section>
 

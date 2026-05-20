@@ -17,9 +17,11 @@
 
         {% csrf_token %}
 
-        <button type="submit" class="btn-eliminar">
-            Sí, eliminar
-        </button>
+        {% if puede_editar %}
+            <button type="submit" class="btn-eliminar">
+                Sí, eliminar
+            </button>
+        {% endif %}
 
         <a href="{% url 'listar_destinos' %}" class="btn-secundario">
             Cancelar

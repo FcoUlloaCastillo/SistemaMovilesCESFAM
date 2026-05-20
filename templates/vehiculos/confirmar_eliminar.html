@@ -11,7 +11,9 @@
 
     <form method="POST" data-confirm-submit data-confirm-title="Eliminar vehículo" data-confirm-text="Esta acción no se puede deshacer." data-confirm-button="Sí, eliminar">
         {% csrf_token %}
-        <button type="submit" class="btn-eliminar">Sí, eliminar</button>
+        {% if puede_editar %}
+            <button type="submit" class="btn-eliminar">Sí, eliminar</button>
+        {% endif %}
         <a href="{% url 'listar_vehiculos' %}" class="btn-secundario">Cancelar</a>
     </form>
 </section>
